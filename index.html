@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LNA 스캐너 연결 테스트</title>
+<style>
+  body { font-family: 'Malgun Gothic', sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
+  h1 { font-size: 1.3rem; }
+  .info { background: #f0f4f8; border-radius: 8px; padding: .8rem 1rem; font-size: .9rem; }
+  button { font-size: 1rem; padding: .6rem 1rem; margin: .3rem .3rem .3rem 0; border-radius: 6px; border: 1px solid #888; background: #fff; cursor: pointer; }
+  button:hover { background: #eef; }
+  #log { margin-top: 1rem; }
+  .entry { border-left: 4px solid #ccc; padding: .4rem .8rem; margin: .4rem 0; font-size: .9rem; white-space: pre-wrap; word-break: break-all; }
+  .ok   { border-color: #2a9d2a; background: #eefaee; }
+  .fail { border-color: #d43; background: #fdeeee; }
+  .guide { display: none; background: #fff8e1; border: 1px solid #e0c060; border-radius: 8px; padding: .8rem 1rem; margin-top: 1rem; font-size: .9rem; }
+</style>
+</head>
+<body>
+<h1>지문 스캐너 LNA(Local Network Access) 연결 테스트</h1>
+
+<div class="info">
+  <div>페이지 origin: <b id="origin"></b> (공개 주소 공간)</div>
+  <div>브라우저: <b id="ua"></b></div>
+  <div>호출 대상: 로컬 지문 스캐너 API 서버 (loopback)</div>
+</div>
+
+<h3>1. 기본 fetch</h3>
+<button onclick="run('https://localhost:60101/', {mode:'no-cors'}, 'localhost 기본')">https://localhost:60101</button>
+<button onclick="run('https://127.0.0.1:60101/', {mode:'no-cors'}, '127.0.0.1 기본')">https://127.0.0.1:60101</button>
+
+<h3>2. targetAddressSpace: 'loopback' 명시</h3>
+<button onclick="run('https://localhost:60101/', {mode:'no-cors', targetAddressSpace:'loopback'}, 'localhost +tAS')">https://localhost:60101</button>
+<button onclick="run('https://127.0.0.1:60101/', {mode:'no-cors', targetAddressSpace:'loopback'}, '127.0.0.1 +tAS')">https://127.0.0.1:60101</button>
+
+<div id="guide" class="guide">
+  <b>연결이 차단되었습니다.</b> 이전에 "차단"을 선택했다면 아래 절차로 다시 허용할 수 있습니다:<br>
+  ① 주소창 왼쪽 자물쇠(🔒) 클릭 → ② "사이트 권한" → ③ "로컬 네트워크 액세스(장치)" 를 <b>허용</b>으로 변경 → ④ 페이지 새로고침
+</div>
+
+<div id="log"></div>
+
+<script>
+document.getElementById('origin').textContent = location.origin;
+document.getElementById('ua').textContent = navigator.userAgent.match(/Edg\/[\d.]+|Chrome\/[\d.]+/)?.[0] || navigator.userAgent;
+
+function stamp() { return new Date().toLocaleTimeString('ko-KR', {hour12:false}); }
+
+function addLog(cls, text) {
+  const d = document.createElement('div');
+  d.className = 'entry ' + cls;
+  d.textContent = '[' + stamp() + '] ' + text;
+  document.getElementById('log').prepend(d);
+}
+
+async function run(url, opts, label) {
+  addLog('', label + ' → 요청 중...');
+  const t0 = performance.now();
+  try {
+    const r = await fetch(url, opts);
+    const ms = Math.round(performance.now() - t0);
+    addLog('ok', label + ' ✅ 성공 (' + ms + 'ms, type=' + r.type + (r.type !== 'opaque' ? ', status=' + r.status : '') + ')');
+    document.getElementById('guide').style.display = 'none';
+  } catch (e) {
+    const ms = Math.round(performance.now() - t0);
+    addLog('fail', label + ' ❌ 실패 (' + ms + 'ms): ' + e.name + ' — ' + e.message
+      + '\nF12 콘솔에 "address space" 문구가 있으면 LNA 차단, "ERR_CERT"면 인증서 문제입니다.');
+    document.getElementById('guide').style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>
