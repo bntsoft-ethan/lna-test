@@ -42,7 +42,7 @@
 <button onclick="run('tas-127', 'https://127.0.0.1:60101/', {mode:'no-cors', targetAddressSpace:'loopback'})">127.0.0.1:60101</button>
 
 <h3>개별: 실제 API 호출 (CORS, 응답 본문 수신)</h3>
-<button onclick="run('api-version', 'https://localhost:60101/api/GetVersion', {method:'GET'}, true)">GET /api/GetVersion</button>
+<button onclick="run('api-version', 'https://localhost:60101/api/v1/version', {method:'POST'}, true)">POST /api/v1/version</button>
 <button onclick="run('api-health', 'https://localhost:60101/api/v1/health', {method:'GET'}, true)">GET /api/v1/health</button>
 
 <div id="guide" class="guide">
@@ -115,7 +115,7 @@ async function runAll() {
   await run('nc-127', 'https://127.0.0.1:60101/', {mode:'no-cors'});
   await run('tas-localhost', 'https://localhost:60101/', {mode:'no-cors', targetAddressSpace:'loopback'});
   await run('tas-127', 'https://127.0.0.1:60101/', {mode:'no-cors', targetAddressSpace:'loopback'});
-  await run('api-version', 'https://localhost:60101/api/GetVersion', {method:'GET'}, true);
+  await run('api-version', 'https://localhost:60101/api/v1/version', {method:'POST'}, true);
   await run('api-health', 'https://localhost:60101/api/v1/health', {method:'GET'}, true);
   results.meta.lnaPermissionAfter = await queryPerm();
   const el = document.getElementById('json');
